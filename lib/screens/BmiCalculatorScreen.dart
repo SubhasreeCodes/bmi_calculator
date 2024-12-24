@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'ResultScreen.dart';
 
 class BmiCalculatorScreen extends StatefulWidget {
@@ -14,6 +13,8 @@ class _BmiCalculatorScreenState extends State<BmiCalculatorScreen> {
   double weight = 50;
   int age = 25;
   String gender = "Male";
+
+  final TextEditingController _ageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +94,7 @@ class _BmiCalculatorScreenState extends State<BmiCalculatorScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Weight Card with Number Slider
+                // Weight Card with Simple Slider
                 Flexible(
                   flex: 1,
                   child: Card(
@@ -113,6 +114,8 @@ class _BmiCalculatorScreenState extends State<BmiCalculatorScreen> {
                             value: weight,
                             min: 30,
                             max: 200,
+                            divisions: 170, // 170 steps between the min and max
+                            label: weight.toStringAsFixed(1),
                             onChanged: (double newWeight) {
                               setState(() {
                                 weight = newWeight;
@@ -148,6 +151,7 @@ class _BmiCalculatorScreenState extends State<BmiCalculatorScreen> {
                           SizedBox(
                             width: 80,
                             child: TextField(
+                              controller: _ageController,
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(
                                 hintText: "Age",
@@ -172,13 +176,38 @@ class _BmiCalculatorScreenState extends State<BmiCalculatorScreen> {
             // Calculate BMI Button
             ElevatedButton(
               onPressed: () {
-                double bmi = weight / ((height / 100) * (height / 100));
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ResultScreen(bmi: bmi), // Navigate to ResultScreen
-                  ),
-                );
+                // Ensure valid height and weight are set
+                if (height >= 100 && weight >= 30) {
+                  double bmi = weight / ((height / 100) * (height / 100));
+                  // Navigate to ResultScreen and pass the BMI value and other data
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ResultScreen(
+                        bmi: bmi,
+                        gender: gender,
+                        height: height,
+                        weight: weight,
+                        age: age,
+                      ),
+                    ),
+                  );
+                } else {
+                  // Show a simple alert dialog if height or weight are invalid
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Invalid Input"),
+                      content: const Text("Please make sure height and weight are within the valid range."),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("OK"),
+                        ),
+                      ],
+                    ),
+                  );
+                }
               },
               child: const Text("Calculate BMI"),
               style: ElevatedButton.styleFrom(
@@ -231,5 +260,3 @@ class GenderCard extends StatelessWidget {
     );
   }
 }
-
-
